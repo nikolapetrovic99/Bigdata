@@ -138,9 +138,7 @@ import javax.naming.Context;
             //tripDataStream.print();
             //List<String> locations = Arrays.asList("Lincoln Memorial", "15th & P St NW");
 
-                    //there is keyed and non-keyed windowing stream, non-keyed do all the work in one task while
             DataStream<BikesTrip> newTripData1 = tripDataStream.rebalance();
-
             SingleOutputStreamOperator<Tuple6<String, Double, Double, Double, Double, Integer>> AggregateStream = newTripData1
                     .keyBy(BikesTrip::getStart_station_number)
                     .window(SlidingProcessingTimeWindows.of(Time.seconds(20), Time.seconds(10)))
@@ -165,35 +163,6 @@ import javax.naming.Context;
 
         }
 
-
-
-
-    //		// Sets up the execution environment, which is the main entry point
-//		// to building Flink applications.
-//		final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-//
-//		/*
-//		 * Here, you can start creating your execution plan for Flink.
-//		 *
-//		 * Start with getting some data from the environment, like
-//		 * 	env.fromSequence(1, 10);
-//		 *
-//		 * then, transform the resulting DataStream<Long> using operations
-//		 * like
-//		 * 	.filter()
-//		 * 	.flatMap()
-//		 * 	.window()
-//		 * 	.process()
-//		 *
-//		 * and many more.
-//		 * Have a look at the programming guide:
-//		 *
-//		 * https://nightlies.apache.org/flink/flink-docs-stable/
-//		 *
-//		 */
-//
-//		// Execute program, beginning computation.
-//		env.execute("Flink Java API Skeleton");
 }
 
 

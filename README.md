@@ -77,7 +77,7 @@ After that, create keyspace:
 ```
 CREATE KEYSPACE newkeyspace WITH REPLICATION = {'class' : 'SimpleStrategy', 'replication_factor' : 1 };
 ```
-Next step is creating a tables, in our spark application, name of the tables are: sparkone and sparktwo.
+Next step is creating a tables, in our spark application, name of the tables are: `sparkone` and `sparktwo`.
 Creating looks like this, in this specific case:
 ```
 CREATE TABLE IF NOT EXISTS newkeyspace.sparkone (start_station text, avg_duration double, max_duration text, mean_duration double, min_duration text, start_station_count bigint, start_date timestamp, end_date timestamp, PRIMARY KEY (start_station, start_date, end_date))
@@ -104,7 +104,7 @@ In consumer_spark folder, open cmd and write:
 ```
 docker run --name proj2 --net bde -p 4040:4040 -d bde/spark-app
 ```
-Args of spark application are N, and it is set in DockerFile in consumer_spark.
+Args of spark application are `N`, and it is set in DockerFile in `consumer_spark`.
 
 Now wait for errors :P
 
@@ -124,10 +124,10 @@ In flink-java folder, open cmd and write:
 ```
 mvn clean package
 ```
-On web UI you will select option Submit new job --> + Add new, and select your created jar file which is in target folder,
-in this case is called: flink-java-1.0-SNAPSHOT
-By clicking at new added jar in web UI, there need to be: projekat.DataStreamJob in first textbox,
-in text box "Program Arguments" you can write: 5 "Lincoln Memorial" "15th & P St NW" - or stations which you like, the number of stations is not limited
+On web UI you will select option `Submit new job --> + Add new`, and select your created jar file which is in target folder,
+in this case is called: `flink-java-1.0-SNAPSHOT`
+By clicking at new added jar in web UI, there need to be: `projekat.DataStreamJob` in first textbox,
+in text box "Program Arguments" you can write: `5 "Lincoln Memorial" "15th & P St NW"` - or stations which you like, the number of stations is not limited
 
 
 

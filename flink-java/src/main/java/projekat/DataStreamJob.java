@@ -93,17 +93,6 @@ import javax.naming.Context;
             }
         }).filter(Objects::nonNull).forward();
     }
-    public static FlinkKafkaConsumer<String> createStringConsumerForTopic(
-            String topic, String kafkaAddress) {
-
-        Properties props = new Properties();
-        props.setProperty("bootstrap.servers", kafkaAddress);
-        //props.setProperty("group.id",kafkaGroup);
-        FlinkKafkaConsumer<String> consumer = new FlinkKafkaConsumer<>(
-                topic, new SimpleStringSchema(), props);
-
-        return consumer;
-    }
         public static void main(String[] args) throws Exception {
 
             int n;

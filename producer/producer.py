@@ -23,5 +23,5 @@ while True:
       
             value["ts"] = int(time.time())
             producer.send(os.environ["KAFKA_TOPIC1"], value=value)
-            #producer.send(os.environ["KAFKA_TOPIC2"], value=value)
+            producer.send(os.environ["KAFKA_TOPIC2"], value=value)
             time.sleep(float(os.environ["KAFKA_INTERVAL"]))

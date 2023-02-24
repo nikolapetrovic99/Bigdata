@@ -1,5 +1,4 @@
 projekat\CustomAggregate.class
-projekat\proces.class
 projekat\TopNMostPopular.class
 models\BikesTrip$BikesTripBuilder.class
 projekat\CassandraService.class

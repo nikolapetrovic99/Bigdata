@@ -39,7 +39,7 @@ public final class CassandraService {
             rs = session.execute("SELECT * FROM system_schema.tables WHERE keyspace_name = '" + KEYSPACE_NAME + "' AND table_name = '" + table + "'");
             if (rs.isExhausted()) {
                 //treba da se doda primary key kad se ubaci vreme da to bude komb
-                session.execute("CREATE TABLE " + KEYSPACE_NAME + "." + "\"" + table + "\"" + " (start_station text PRIMARY KEY, avg_duration double, min_duration double, max_duration double, total_duration double, count int)");
+                session.execute("CREATE TABLE " + KEYSPACE_NAME + "." + "\"" + table + "\"" + " (start_station text, avg_duration double, min_duration double, max_duration double, total_duration double, count int, PRIMARY KEY ((start_station, avg_duration, min_duration, max_duration, total_duration,count )))");
             }
             rs = session.execute("SELECT * FROM system_schema.tables WHERE keyspace_name = '" + KEYSPACE_NAME + "' AND table_name = '" + table2 + "'");
             if (rs.isExhausted()) {

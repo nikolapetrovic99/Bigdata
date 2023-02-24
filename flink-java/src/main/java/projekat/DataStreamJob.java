@@ -119,8 +119,7 @@ import javax.naming.Context;
                     .setStartingOffsets(OffsetsInitializer.earliest())
                     .setValueOnlyDeserializer(new SimpleStringSchema())
                     .build();
-            //DataStream<String> dataStream = StreamConsumer(inputTopic, server, env);
-            //dataStream.print();
+
             DataStream<String> text = env.fromSource(source, WatermarkStrategy.noWatermarks(), "Kafka Source");
             //text.print();
             DataStream<BikesTrip> tripDataStream = ConvertStreamFromJsonToBikesTripType(text);
@@ -128,6 +127,7 @@ import javax.naming.Context;
             //List<String> locations = Arrays.asList("Lincoln Memorial", "15th & P St NW");
 
             DataStream<BikesTrip> newTripData1 = tripDataStream.rebalance();
+
             SingleOutputStreamOperator<Tuple6<String, Double, Double, Double, Double, Integer>> AggregateStream = newTripData1
                     .keyBy(BikesTrip::getStart_station_number)
                     .window(SlidingProcessingTimeWindows.of(Time.seconds(20), Time.seconds(10)))

@@ -24,11 +24,6 @@ public final class CassandraService {
 
     public final void sinkToCassandraDB(SingleOutputStreamOperator<Tuple6<String, Double, Double, Double, Double, Integer>> sinkTripsStream, String table, SingleOutputStreamOperator<Tuple4<String, String, List<String>, List<Integer>>> popularStationsStream, String table2) throws Exception {
 
-
-       /* SingleOutputStreamOperator<Tuple3<String, String, String>> sinkTripsDataStream = sinkTripsStream.map((MapFunction<BikesTrip, Tuple3<String, String, String>>) trip ->
-                        new Tuple3<>(trip.getStart_station(), trip.getEnd_station(), trip.getBike_number()))
-                .returns(new TupleTypeInfo<>(TypeInformation.of(String.class), TypeInformation.of(String.class), TypeInformation.of(String.class)));
-        */
         try (Cluster cluster = Cluster.builder().addContactPoint("cassandra"/*app na kontejneru*//*"127.0.0.1"*//*app na lokalu*/).build()) {
             Session session = cluster.connect();
 
@@ -45,8 +40,6 @@ public final class CassandraService {
             if (rs.isExhausted()) {
                 session.execute("CREATE TABLE " + KEYSPACE_NAME + "." + "\"" + table2 + "\"" + " (window_start text, window_end text, stations list<text>, counts list<int>, PRIMARY KEY ((window_start, window_end)))");
             }
-
-
         }
         //"Open Cassandra connection and Sinking data into cassandraDB."
         CassandraSink.addSink(sinkTripsStream)

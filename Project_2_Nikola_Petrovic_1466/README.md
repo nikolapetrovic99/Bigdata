@@ -1,9 +1,10 @@
 # Kafka Spark Flink Docker python java Docker Desktop Windows
 
 Link to canva presentation:
-```
+
+
 https://www.canva.com/design/DAFbb8kpLQw/7XWqn8LDcNnsMx8kSciZbQ/view?utm_content=DAFbb8kpLQw&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
-```
+
 
 This is an example project setup with Kafka, Spark and Flink. It contains:
 * A Kafka producer sending data over a topic/s, 

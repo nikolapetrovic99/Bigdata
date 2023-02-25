@@ -6,7 +6,7 @@ https://www.canva.com/design/DAFbb8kpLQw/7XWqn8LDcNnsMx8kSciZbQ/view?utm_content
 ```
 
 This is an example project setup with Kafka, Spark and Flink. It contains:
-* A Kafka producer sending data over a topic/s,
+* A Kafka producer sending data over a topic/s, 
 * A consumer processing the data stream using Spark with Structured Streaming in py,
 * A consumer processing the data stream using Flink in java,
 * A docker-compose file to start up and shut down all kafka and spark containers.

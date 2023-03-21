@@ -1,6 +1,7 @@
 import argparse
 import os
 import sys
+from tokenize import String
 from pyspark.sql import SparkSession
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType, TimestampType
 from pyspark.sql.functions import (
@@ -19,27 +20,21 @@ from datetime import datetime
 #from influx_writer import InfluxDBWriter
 
 class InfluxDBWriter:
-    def __init__(self, approaches, cloud=False):
-        self.url = "http://influxdb:8086"
-        self.token = "f7bb5b113d8eede7e94b8574ba91e75e"
-        self.org = "anjebza"
-        self.bucket = "telegraf"
-        #self.approaches = approaches
-        if cloud: # Connect to InfluxDB Cloud
-            self.client = InfluxDBClient(
-                url="<cloud.url>", 
-                token="<cloud.token>", 
-                org="<cloud.org>"
-            )
-        else: # Connect to a local instance of InfluxDB
-            self.client = InfluxDBClient(url=self.url, token=self.token, org=self.org)
-        # Create a writer API
+    def __init__(self):
+        self._org = 'sparkbikesdb'
+        self._token = 'f7bb5b113d8eede7e94b8574ba91e75e'
+        self.client = InfluxDBClient(
+            url = "http://influxdb:8086", token=self._token, org = self._org)
         self.write_api = self.client.write_api(write_options=SYNCHRONOUS)
 
     def open(self, partition_id, epoch_id):
         print("Opened %d, %d" % (partition_id, epoch_id))
         return True
-    
+
+    def process(self, row):
+        self.write_api.write(bucket='sparkbikesdb',
+                             record=self._row_to_point(row))
+
     def close(self, error):
         self.write_api.__del__()
         self.client.__del__()
@@ -47,23 +42,23 @@ class InfluxDBWriter:
     
     def _row_to_point(self, row):
         print(row)
-        timestamp = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+        # String to timestamp
+        #timestamp = datetime.strptime(row["timestamp"], "%d/%m/%Y %H:%M:%S.%f %p")
+        #print(f"> Processing {timestamp}")
         return Point.measurement("tabela").tag("measure", "tabela") \
-                    .time(timestamp, write_precision='ms') \
-                    .field("Start date", int(row['Start date'])) \
-                    .field("Start station number", int(row['Start station number'])) \
-                    .field("Start station", String(row['Start station'])) \
-                    .field("End station number", int(row['End station number'])) \
-                    .field("End station", String(row['End station'])) \
-                    .field("Bike number", String(row['bike number'])) \
-                    .field("Member type", String(row['Member type'])) \
+                    .time(datetime.utcnow(), WritePrecision.NS) \
+                    .field("Start year", int(row['Start year'])) \
+                    .field("Start month", int(row['Start month'])) \
+                    .field("Start day", str(row['Start day'])) \
+                    .field("Start minute", int(row['Start minute'])) \
+                    .field("Start second", str(row['Start second'])) \
+                    .field("Start station", str(row['start_station_index'])) \
+                    .field("End station", str(row['end_station_index'])) \
+                    .field("Member type", str(row['member_type_index'])) \
+                    .field("Bike number", str(row['Bike_number_index'])) \
                     .field("Duration", int(row['Duration'])) \
                     .field("prediction", int(row['prediction']))
-    def process(self, row):
-        try:
-            self.write_api.write(bucket=self.bucket, org=self.org, record=self._row_to_point(row))
-        except Exception as ex:
-            print(f"[x] Error {str(ex)}")
+
 
 if __name__ == '__main__':
 
@@ -118,8 +113,15 @@ if __name__ == '__main__':
     )
     dataset = dataset.select(from_json(col("value"), schema).alias("dataset")).select("dataset.*")
     dataset.printSchema()
-    
+    """input_folder="hdfs://namenode:9000/dir/Data"
+    dataset = spark.read \
+                .option("inferSchema", True) \
+                .option("header", True) \
+                .csv(input_folder)
 
+    print("\nDataset: \n")
+    dataset.printSchema()"""
+    #dataset.show(5)
     # Remove end date from dataset for regression model and calculating duration
     dataset = dataset.drop("End date") \
                 .withColumn("Start year", year("Start date")) \
@@ -160,7 +162,7 @@ if __name__ == '__main__':
     query.awaitTermination()"""
 
     dataset_copy = dataset.alias("dataset_copy")
-    model = PipelineModel.load(os.environ["REGRESSION_MODEL"])
+    
 
     # Select all columns except the target (Duration)
     feature_cols = dataset_copy.columns[:-1]
@@ -170,21 +172,35 @@ if __name__ == '__main__':
 
     # Transform the DataFrame to include the combined feature column
     dataset_copy = assembler.transform(dataset_copy)
-
-    prediction = model.transform(dataset_copy)
-
-
+    print("Features implemented in dataset",dataset_copy.printSchema())
     
+    model = PipelineModel.load(os.environ["REGRESSION_MODEL"])
+    prediction = model.transform(dataset_copy)
+    prediction.printSchema()
+    """print(f"> Stampanje u konzoli ...")
+    query = (prediction
+            #.withWatermark("timestamp", "1 minute")
+            .writeStream
+            .outputMode("update")
+            .queryName("DeesriptiveAnalysis")
+            .format("console")
+            .trigger(processingTime="5 seconds")
+            .option("truncate", "false")
+            #.foreachBatch(writeToCassandra)
+            .start()
+    )"""
     print(f"> Reading the stream and storing ...")
     query = (prediction
         .writeStream
-        .foreach(InfluxDBWriter( """approaches = sys.argv[1:]""" ))
+        .foreach(InfluxDBWriter())
         #.option("checkpointLocation", "checkpoints")
-        .start())
+        .start()
+        #.awaitTermination()
+        )
 
     query.awaitTermination()
     #spark.streams.awaitAnyTermination()
-    
 
-    spark.stop()
+
+    #spark.stop()
 

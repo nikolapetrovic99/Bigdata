@@ -1,0 +1,23 @@
+version: "3"
+
+services:
+  influxdb:
+    image: influxdb:1.8
+    ports:
+      - "0.0.0.0:8086:8086"
+    container_name: influxdb
+    hostname: influxdb
+    environment:
+      - INFLUXDB_ADMIN_ENABLED=true
+      - INFLUXDB_DB=sparkbikesdb
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=f7bb5b113d8eede7e94b8574ba91e75e
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "0.0.0.0:3000:3000"
+    container_name: grafana
+    hostname: grafana
+networks:
+  default:
+    external:
+      name: bde

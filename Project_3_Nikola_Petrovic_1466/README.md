@@ -1,10 +1,5 @@
 # pyspark-kafka-influxdb-grafana
 
-Link to canva presentation:
-
-
-https://www.canva.com/design/DAFbb8kpLQw/7XWqn8LDcNnsMx8kSciZbQ/view?utm_content=DAFbb8kpLQw&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
-
 
 This is an example project setup with Kafka, Spark and Regression model. It contains:
 * A Kafka producer sending data over a topic/s, 
@@ -15,10 +10,7 @@ This is an example project setup with Kafka, Spark and Regression model. It cont
 * A regression folder for creating models for regression, indexing and scaling
 * Influx-grafana folder for vizualisation of data
 
-In this example, the data is sent in JSON format containing informations about bike trip history data in Washington(https://s3.amazonaws.com/capitalbikeshare-data/index.html) - On this repository is just the part of the data, because .csv with all data is too big..
-Both spark and flink consumers first read data from kafka producer, and deserialize it in acceptable format. Then, using a technique of sliding window
-takes some default informations of data, like mean, average, min, max. Next is top N most popular locations.
-Applications are simple, and main goal is a representation of how spark and flink can communicate with kafka producer.
+In this example, the point is on training regression model for predicting data that are sent from kafka to spark application. 
 
 In the following, the way to launch complete applications and the meaning of certain parts of the code will be described.
 

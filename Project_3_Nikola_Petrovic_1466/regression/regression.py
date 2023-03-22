@@ -10,7 +10,6 @@ from pyspark.sql.functions import (
 from pyspark.ml.feature import StringIndexer, VectorAssembler
 from pyspark.ml.evaluation import RegressionEvaluator
 from pyspark.ml.regression import LinearRegression, DecisionTreeRegressor, RandomForestRegressor
-from pyspark.ml.feature import StringIndexerModel
 from pyspark.ml import PipelineModel
 from pyspark.ml import Pipeline
 
@@ -74,28 +73,29 @@ if __name__ == "__main__":
 
 
     # Calculate the mean and standard deviation of the Duration column
-    mean_val = dataset.select(mean(col('Duration'))).collect()[0][0]
+    """mean_val = dataset.select(mean(col('Duration'))).collect()[0][0]
     stddev_val = dataset.select(stddev(col('Duration'))).collect()[0][0]
 
     # Define the lower and upper bounds for outliers
     lower_bound = mean_val - 3 * stddev_val
     upper_bound = mean_val + 3 * stddev_val
 
-    """# Filter the DataFrame to find outliers
+    # Filter the DataFrame to find outliers
     outliers = dataset.filter((col('Duration') < lower_bound) | (col('Duration') > upper_bound))
 
     # Count the number of outliers
     num_outliers = outliers.count()
 
-    print("Number of outliers in the 'Duration' column: ", num_outliers)"""
+    print("Number of outliers in the 'Duration' column: ", num_outliers)
 
-    non_outliers = dataset.where((col('Duration') >= lower_bound) & (col('Duration') <= upper_bound))
+    non_outliers = dataset.where((col('Duration') >= 500) & (col('Duration') <= 2500))
     # Count the number of non-outliers
     num_non_outliers = non_outliers.count()
 
     print("Number of non-outliers in the 'Duration' column: ", num_non_outliers)
 
-    dataset=non_outliers
+    dataset=non_outliers"""
+    dataset=dataset.where((col('Duration') >= 500) & (col('Duration') <= 2500))
     dataset = dataset.drop("End date")
     dataset = dataset.drop("Start station number")
     dataset = dataset.drop("End station number")
@@ -108,28 +108,13 @@ if __name__ == "__main__":
                      .withColumn("Start second", second("Start date")) \
                      .drop("Start date")
 
-    """start_station_indexer = StringIndexer(inputCol="Start station", outputCol="start_station_index")
-    end_station_indexer = StringIndexer(inputCol="End station", outputCol="end_station_index")
-
-    dataset = start_station_indexer.fit(dataset).transform(dataset)
-    dataset = end_station_indexer.fit(dataset).transform(dataset)
-    dataset = dataset.drop("Start station")
-    dataset = dataset.drop("End station")
-
-    indexer = StringIndexer(inputCol="Member type", outputCol="member_type_index")
-    indexed = indexer.fit(dataset).transform(dataset)
-    dataset = indexed.drop("Member type")
-
-    indexer = StringIndexer(inputCol="Bike number", outputCol="Bike_number_index")
-    dataset = indexer.fit(dataset).transform(dataset)
-    dataset = dataset.drop("Bike number")"""
 
 
     # Define the indexers
-    start_station_indexer = StringIndexer(inputCol="Start station", outputCol="start_station_index")
-    end_station_indexer = StringIndexer(inputCol="End station", outputCol="end_station_index")
-    member_type_indexer = StringIndexer(inputCol="Member type", outputCol="member_type_index")
-    bike_number_indexer = StringIndexer(inputCol="Bike number", outputCol="Bike_number_index")
+    start_station_indexer = StringIndexer(inputCol="Start station", outputCol="start_station_index", handleInvalid="keep")
+    end_station_indexer = StringIndexer(inputCol="End station", outputCol="end_station_index", handleInvalid="keep")
+    member_type_indexer = StringIndexer(inputCol="Member type", outputCol="member_type_index", handleInvalid="keep")
+    bike_number_indexer = StringIndexer(inputCol="Bike number", outputCol="Bike_number_index", handleInvalid="keep")
 
     # Define the pipeline stages
     pipeline = Pipeline(stages=[start_station_indexer, end_station_indexer, member_type_indexer, bike_number_indexer])
@@ -166,15 +151,37 @@ if __name__ == "__main__":
     dataset_copy.show(5)
 
     # Split the dataset into train and test sets
-    train_data, test_data = dataset_copy.randomSplit([0.8, 0.2], seed=123)
+    train_data, validation_data = dataset_copy.randomSplit([0.8, 0.2], seed=123)
 
+    
+    """from pyspark.ml.feature import StandardScaler, PCA
+
+    # Ne daje bolje rezultate, cak stavise daje losije
+    # Add PCA
+    pca = PCA(k=10, inputCol="features", outputCol="pca_features")
+
+    # Create a StandardScaler object
+    scaler = StandardScaler(inputCol="pca_features", outputCol="scaled_features")
+    # Define the pipeline stages
+    pipeline = Pipeline(stages=[pca, scaler])
+
+    # Fit the pipeline to the dataset
+    scaler_model = pipeline.fit(train_data)
+
+    # Save the fitted pipeline to HDFS
+    scaler_model.write().overwrite().save("hdfs://namenode:9000/dir/modelScaler")
+
+    scaler_model = PipelineModel.load("hdfs://namenode:9000/dir/modelScaler")
+    # Scale the training data
+    train_data = scaler_model.transform(train_data)
+    # Scale the test data using the fitted scaler model
+    test_data = scaler_model.transform(test_data)"""
     
 
     # Create a LinearRegression instance
-    rf = RandomForestRegressor(featuresCol="features", labelCol="Duration", numTrees=10, maxBins=5000)
+    rf = RandomForestRegressor(featuresCol="features", labelCol="Duration", numTrees=10, maxBins=10000)
     #lr = LinearRegression(featuresCol="features", labelCol="Duration")
     #lr.setMaxIter(5)
-    
 
     pipeline = Pipeline(stages=[rf])
 
@@ -183,25 +190,18 @@ if __name__ == "__main__":
 
     # Evaluate the LinearRegression model
 
-    def evaluate_model(model_name, model, test_data):
+    def evaluate_model(model_name, model, validation_data):
         # Make predictions on the test data
-        predictions = model.transform(test_data)
+        predictions = model.transform(validation_data)
 
-        # Call the plotting function
-        #plot_prediction(predictions.toPandas(), number_of_samples=50)
-
-        # Evaluate the model
-        #evaluator = RegressionEvaluator(labelCol="Duration", predictionCol="prediction", metricName="rmse")
-
-        #rmse = evaluator.evaluate(predictions)
         #print("Root Mean Squared Error (RMSE) of %s on test data = %g" % (model_name, rmse))
         eval = RegressionEvaluator(labelCol = 'Duration', predictionCol="prediction")
         rmse = eval.evaluate(predictions, {eval.metricName:'rmse'})
         r2 =eval.evaluate(predictions,{eval.metricName:'r2'})
-        print("RMSE: %.2f" %rmse)
+        print(model_name, "RMSE: %.2f" %rmse)
         #print("MAE: %.2f" %mae)
-        print("R2: %.2f" %r2)
-    evaluate_model("Random forest regression", lr_model, test_data)
+        print(model_name, "R2: %.2f" %r2)
+    evaluate_model("Random forest regression", lr_model, validation_data)
     lr_model.write().overwrite().save("hdfs://namenode:9000/dir/modelData")
 
 

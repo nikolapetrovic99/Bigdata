@@ -1,0 +1,6 @@
+projekat\CustomAggregate.class
+projekat\TopNMostPopular.class
+models\BikesTrip$BikesTripBuilder.class
+projekat\CassandraService.class
+models\BikesTrip.class
+projekat\DataStreamJob.class

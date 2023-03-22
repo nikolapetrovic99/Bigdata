@@ -1,4 +1,4 @@
-# Kafka Spark Flink Docker python java Docker Desktop Windows
+# pyspark-kafka-influxdb-grafana
 
 Link to canva presentation:
 
@@ -12,6 +12,8 @@ This is an example project setup with Kafka, Spark and Regression model. It cont
 * A docker-compose file to start up and shut down all kafka and spark containers.
 * A consumer_spark folder with whole configuration and a .py program for kafka consumer in spark.
 * A requirements.txt with pip installs.
+* A regression folder for creating models for regression, indexing and scaling
+* Influx-grafana folder for vizualisation of data
 
 In this example, the data is sent in JSON format containing informations about bike trip history data in Washington(https://s3.amazonaws.com/capitalbikeshare-data/index.html) - On this repository is just the part of the data, because .csv with all data is too big..
 Both spark and flink consumers first read data from kafka producer, and deserialize it in acceptable format. Then, using a technique of sliding window

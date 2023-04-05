@@ -25,7 +25,7 @@ In the following, the way to launch complete applications and the meaning of cer
 ## How to create a network
 First, we need network in order for the containers to be visible one to another, we will call it bde, open cmd and write:
 ```
-docker create network bde
+docker network create bde
 ```
 Tou can check your containers on Portainer.io
 ## How set up containers 
@@ -73,6 +73,9 @@ Next step is puting data on hdfs, in `prompt#`, same:
 hdfs dfs -put /data/projekat1NP.py /proj
 hdfs dfs -put /data/Data /proj
 ```
+
+Or you can just open folder SparkPython and double click on `puttohdfs` that is a .bat script for putting data on hdfs.
+
 ## Manually starting the application
 In folder where docker-compose and hadoop.env are, open cmd:
 ```
@@ -81,7 +84,7 @@ docker run -it --network bde --env-file hadoop.env -p 4040:4040 --name spark bde
 Now you will see:
 `bash-5.0#` here you starting your spark application
 ```
-/spark/bin/spark-submit --master spark://483cc8cfe04d:7077 hdfs://namenode:9000/proj/projekat1NP.py hdfs://namenode:9000/proj/Data "14th & Harvard St NW" "2016-07-01 00:00:00" "2016-07-02 00:00:00" 2600
+/spark/bin/spark-submit --master spark://fb1d85d74f9a:7077 --executor-memory 4g --total-executor-cores 4 hdfs://namenode:9000/dir/projekat1NP.py hdfs://namenode:9000/dir/Data "14th & Harvard St NW" "2016-01-01 00:00:00" "2016-02-02 00:00:00" 2600
 ```
 `spark://483cc8cfe04d:7077` - address of your spark master, this is address from lolalhost:8070, you can write and 
 real name of your spark master that is set into your docker-compose file, in this app is:  `spark://spark-master:7077`

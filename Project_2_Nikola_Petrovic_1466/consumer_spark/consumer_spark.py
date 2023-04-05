@@ -80,8 +80,8 @@ if __name__ == '__main__':
 
 
     durations = parsed_values.selectExpr("timestamp", "parsed_values.Duration AS Duration", "parsed_values[\"Start station\"] as start_station")
-    windowDuration = "10 seconds"  # The length of the window
-    slideDuration = "5 seconds"  # The sliding interval
+    windowDuration = "60 seconds"  # The length of the window
+    slideDuration = "20 seconds"  # The sliding interval
 
     durationInfo = durations.groupBy(durations.start_station, window(durations.timestamp, windowDuration, slideDuration)).agg(
         avg("Duration").alias("avg_duration"),
@@ -109,7 +109,7 @@ if __name__ == '__main__':
 
 
     popular_start_stations = (durations
-        .groupBy(durations.start_station, window(durations.timestamp, windowDuration, windowDuration))
+        .groupBy(durations.start_station, window(durations.timestamp, windowDuration, slideDuration))
         .agg(count("*").alias("popularity_count"))
         .orderBy(desc("popularity_count"))
         .select(col("start_station"), col("popularity_count"), col("window.start").alias("start_date"), col("window.end").alias("end_date"))
@@ -119,14 +119,14 @@ if __name__ == '__main__':
     top_N_start_stations = popular_start_stations.limit(N)
     top_N_start_stations.printSchema();
 
-
+    print(f"> Reading the stream and storing ...")
     query1 = (
         top_N_start_stations
         .writeStream
         .outputMode("complete")
         .queryName("top_N_start_stations")
         #.format("console")
-        .trigger(processingTime="5 seconds")
+        #.trigger(processingTime="5 seconds")
         #.option("truncate", "true")
         .foreachBatch(writeToCassandra1)
         .start()

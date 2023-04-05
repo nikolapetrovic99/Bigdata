@@ -5,7 +5,7 @@ networks:
     external: true
 services:  
   jobmanager:
-    image: flink:latest
+    image: flink:1.16.0
     expose:
       - "6123"
     ports:
@@ -17,7 +17,7 @@ services:
       - bde
 
   taskmanager:
-    image: flink:latest
+    image: flink:1.16.0
     expose:
       - "6121"
       - "6122"

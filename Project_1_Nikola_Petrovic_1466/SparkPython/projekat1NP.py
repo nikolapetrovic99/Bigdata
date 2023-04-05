@@ -14,8 +14,16 @@ if __name__ == "__main__":
     input_date1 = sys.argv[3]
     input_date2 = sys.argv[4]
     duration=sys.argv[5]
+    print("appName:", appName)
+    print("input_folder:", input_folder)
+    print("input_station:", input_station)
+    print("input_date1:", input_date1)
+    print("input_date2:", input_date2)
+    print("duration:", duration)
     #create a new Spark application and get the Spark session object
     spark = SparkSession.builder.appName(appName).getOrCreate()
+    spark.sparkContext.setLogLevel("ERROR")
+
     #read in the CSV dataset as a DataFrame
     #inferSchema option forces Spark to automatically specify data column types
     #header option forces Spark to automatically fetch column names from the first line in the dataset files
@@ -25,7 +33,7 @@ if __name__ == "__main__":
                 .csv(input_folder)
 
     #dataset.write.csv("C:/Users/Nikola Petrovic/Desktop/bigdata/kafka/kafka-spark-flink-container-main/data/bikes.csv", header=True, mode="overwrite")
-
+    
 
     print("Count of dataset:"+str(dataset.count()))
     print("\nNumber of columns:"+str(len(dataset.columns)))

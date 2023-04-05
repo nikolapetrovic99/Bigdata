@@ -10,12 +10,20 @@ if __name__ == "__main__":
     #Set a name for the application
     appName = "DataFrame Example"
     input_folder = sys.argv[1]
-    input_station = sys.argv[2]
+    input_bikenumber = sys.argv[2]
     input_date1 = sys.argv[3]
     input_date2 = sys.argv[4]
     duration=sys.argv[5]
+    print("appName:", appName)
+    print("input_folder:", input_folder)
+    print("input_bikenumber:", input_bikenumber)
+    print("input_date1:", input_date1)
+    print("input_date2:", input_date2)
+    print("duration:", duration)
     #create a new Spark application and get the Spark session object
     spark = SparkSession.builder.appName(appName).getOrCreate()
+    spark.sparkContext.setLogLevel("ERROR")
+
     #read in the CSV dataset as a DataFrame
     #inferSchema option forces Spark to automatically specify data column types
     #header option forces Spark to automatically fetch column names from the first line in the dataset files
@@ -24,7 +32,7 @@ if __name__ == "__main__":
                 .option("header", True) \
                 .csv(input_folder)
 
-
+    #dataset.write.csv("C:/Users/Nikola Petrovic/Desktop/bigdata/kafka/kafka-spark-flink-container-main/data/bikes.csv", header=True, mode="overwrite")
 
     print("Count of dataset:"+str(dataset.count()))
     print("\nNumber of columns:"+str(len(dataset.columns)))
@@ -36,12 +44,12 @@ if __name__ == "__main__":
     dataset.select(min("duration"), max("duration"), mean("duration"), stddev("duration")).show(10)
 
     # Use input timestamp in filter conditions
-    print("\n Station details:\n")
-    result = dataset.filter((col("Start station") == input_station))
+    print("\n Bike number details:\n")
+    result = dataset.filter((col("Bike number") == input_bikenumber))
     # Show only top 5 rows
     result.show(5)
 
-    print("\n Station details from-to date:\n")
+    print("\n Bike details from-to date:\n")
     result = result.filter((col("Start date") >= lit(input_date1)) & (col("Start date") <= lit(input_date2)))
     # Show only top 5 rows
 
@@ -51,7 +59,7 @@ if __name__ == "__main__":
     print(f"\nNumber of rides from{input_date1} to {input_date2} : {rows}\n")
 
 
-    result = dataset.filter((col("Start station") != input_station) & (col("Duration") > duration))
+    result = dataset.filter((col("Bike number") != input_bikenumber) & (col("Duration") > duration))
     result.show(5)
 
     rows = result.count()
@@ -87,9 +95,10 @@ if __name__ == "__main__":
 
     # The most popular Start station will be the first row of the sorted counts
     most_popular_start_station = sorted_start_station.first()["Start station"]
-    print("Popularity of start stations:\n")
+    print("\nPopularity of start stations:\n")
     sorted_start_station.show(10, False)
-    print("Most popular start station:\n")
+    
+    print("\n\nMost popular start station:\n")
     print(most_popular_start_station)
 
     # Extract the hour of the day from the "Start date" column
@@ -107,7 +116,7 @@ if __name__ == "__main__":
     # The most popular hours will be the first rows of the sorted averages
     most_popular_hours = sorted_avg_rides.select("hour", "avg_rides")
     # Display the data in tabular format with hour and average number of bike rides for each hour
-    print("\nDisplay the sorted data in tabular format with hour and average number of bike rides for each hour\n")
+    print("\n\nDisplay the sorted data in tabular format with hour and average number of bike rides for each hour\n")
     most_popular_hours.show()
 
 """

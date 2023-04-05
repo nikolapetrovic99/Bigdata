@@ -136,7 +136,7 @@ By clicking at new added jar in web UI, there need to be: `projekat.DataStreamJo
 in text box "Program Arguments" you can write: `5 "Lincoln Memorial" "15th & P St NW"` - or stations which you like, the number of stations is not limited
 
 
-
+### Moze doci do nepoklapanja verzija u pom.xml sa instaliranim kontejnerima, savet, nikad ne zakucaj verziju bilo cega na `latest`
 ## How to use
 In the docker-compose, you can specify the following variables:
 * Name of the data source that should be sent over the Kafka topic. You can replace this by any CSV file with headers.

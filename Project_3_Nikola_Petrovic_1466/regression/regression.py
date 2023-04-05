@@ -19,7 +19,7 @@ if __name__ == "__main__":
         print("Usage: <parameters> ")
         exit(-1)
     # Set a name for the application
-    appName = "DataFrame Example"
+    appName = "Regression"
     input_folder = sys.argv[1]
 
    

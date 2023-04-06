@@ -1,0 +1,17 @@
+version: "3.10"
+
+
+networks:
+  bde:
+    external: true
+services:  
+  cassandra:
+    image: cassandra:4.0
+    ports:
+      - 9042:9042
+    volumes:
+      - ~/apps/cassandra:/var/lib/cassandra
+    environment:
+      - CASSANDRA_CLUSTER_NAME=cloudinfra
+    networks:
+      - bde
